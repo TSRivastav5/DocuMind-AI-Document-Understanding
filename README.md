@@ -1,25 +1,8 @@
-# 🧠 DocuMind — AI-Powered Document Understanding
+# DocuMind — AI Document Intelligence
 
-> **Automatically extract key information from invoices, receipts, letters, and scanned documents using OCR + NLP.**
+> **Extract every name, date, amount & clause from any document — in milliseconds.**
 
-![Python](https://img.shields.io/badge/Python-3.10%2B-blue?logo=python)
-![Streamlit](https://img.shields.io/badge/Streamlit-1.x-FF4B4B?logo=streamlit)
-![Tesseract](https://img.shields.io/badge/Tesseract_OCR-5.x-green)
-![spaCy](https://img.shields.io/badge/spaCy-3.7%2B-09A3D5)
-![License](https://img.shields.io/badge/License-MIT-yellow)
-
----
-
-## 📖 What is DocuMind?
-
-DocuMind is a privacy-first document intelligence platform built with **Streamlit**. Upload any scanned image or PDF and it will:
-
-- **Extract all readable text** via Tesseract OCR with intelligent preprocessing
-- **Classify the document** type (Invoice, Receipt, Business Letter, General)
-- **Pull out named entities** — dates, amounts, vendor names, invoice numbers, GSTIN, PAN, emails, and more
-- **Assess image quality** and automatically route to the best OCR pipeline
-- **Display analytics** — entity distribution charts, processing timeline, and confidence metrics
-- **Export results** as a downloadable JSON file
+DocuMind is an AI-powered document understanding tool that accepts PDF, DOCX, and scanned image uploads, runs OCR via Tesseract and NLP via spaCy, then surfaces every named entity — people, organizations, dates, monetary values, legal clauses, and more — in a clean, interactive web UI.
 
 ---
 
@@ -27,241 +10,313 @@ DocuMind is a privacy-first document intelligence platform built with **Streamli
 
 | Feature | Description |
 |---|---|
-| 🔍 **Smart OCR Routing** | Automatically picks Standard, Aggressive, or Photo pipeline based on image quality score |
-| 📄 **PDF Support** | Multi-page PDF handling — skips OCR for selectable-text PDFs |
-| 🧹 **NLP Preprocessing** | NLTK sentence/token splitting + spaCy NER for entity extraction |
-| 🎯 **Regex Fallback** | Extracts Invoice #, GST, PAN, Phone, Email even without spaCy |
-| 📸 **Auto-Crop** | Detects and isolates document boundaries from noisy backgrounds |
-| 📊 **Quality Assessment** | Blur detection (Laplacian variance), contrast score, resolution check |
-| 🗂️ **JSON Export** | Download all extracted entities and timings as structured JSON |
-| 🖼️ **Visual Overlays** | OCR bounding boxes and confidence heatmap on the original image |
+| **OCR Engine** | Tesseract with configurable PSM modes (0–13) and preprocessing (Standard / Aggressive / Photo) |
+| **NLP Extraction** | spaCy `en_core_web_sm` extracts PERSON, ORG, DATE, MONEY, GPE, CARDINAL, PERCENT, TIME, EMAIL, PHONE, GSTIN, PAN, and more |
+| **3D Animated Hero** | CSS-only floating 3D document card with staggered word-drop headline and streaming entity tags |
+| **Dual View Panel** | Side-by-Side, Raw Only, or Cleaned Only — compare Tesseract raw output vs AI-cleaned text at a glance |
+| **Entities Tab** | Grouped by type, color-coded, with confidence badges (HIGH / MEDIUM / LOW) and live filter count |
+| **Live Entity Filters** | Toggle any entity type on/off — Entities tab, JSON view, and tab badge all update instantly |
+| **PSM Mode Control** | Sidebar settings panel exposes all 9 Tesseract PSM modes with human-readable hints |
+| **Pipeline Strip** | After processing: animated OCR → Entities → Confidence status strip with real values |
+| **Action Bar** | Export Results, Download JSON, Download CSV, Copy Cleaned Text, Run Another Document |
+| **Analysis History** | Last 20 analyses stored in `localStorage` — click any to replay results |
+| **Sample Documents** | Built-in sample docs (Invoice, Business Letter) for instant demo without uploading |
+| **Template Presets** | Legal / Invoice / Business Letter templates pre-configure entity filters automatically |
+| **Mobile Responsive** | Bottom navigation bar, stacked layouts, collapsible settings panel on screens < 1024px |
+| **Reduced Motion** | All CSS animations disable cleanly under `prefers-reduced-motion: reduce` |
 
 ---
 
-## 🖥️ Demo Screenshots
+## 🖥️ Tech Stack
 
-### Upload & OCR Routing
-The app scores your image and routes it to the correct processing pipeline before any OCR runs.
+### Backend
+| Layer | Technology |
+|---|---|
+| Web Server | Flask 3.x |
+| OCR | Tesseract (via `pytesseract`) |
+| Image Preprocessing | OpenCV (`opencv-python-headless`), Pillow |
+| NLP | spaCy 3.7+ (`en_core_web_sm`) |
+| PDF Handling | PyMuPDF (`fitz`) |
+| Text Processing | NLTK |
 
-### Entity Extraction Table
-Entities are color-coded by confidence level (High 🟢 / Medium 🟡 / Low 🔴) with type, value, and source displayed.
-
-### Analytics Dashboard
-Bar charts of entity distribution + a processing timeline showing time spent in each stage (Preprocess → OCR → Cleaning → NLP → Extraction).
+### Frontend
+| Layer | Technology |
+|---|---|
+| Structure | Vanilla HTML5 |
+| Styling | Vanilla CSS (design tokens, CSS custom properties) |
+| Logic | Vanilla JavaScript (ES2020, no framework) |
+| Fonts | Instrument Serif, Geist Sans, Geist Mono (Google Fonts) |
+| Icons | Material Symbols Outlined |
+| Animations | Pure CSS `@keyframes` (no GSAP, no Framer Motion) |
 
 ---
 
-## ⚙️ Prerequisites
+## 📁 Project Structure
 
-Install the following **system dependencies** before running the app:
+```
+doc_understanding_demo/
+│
+├── web_app.py              # Flask entry point — serves /static/index.html + /api/*
+├── app.py                  # Legacy Streamlit app (untouched, parallel entry point)
+│
+├── static/
+│   ├── index.html          # Single-page app shell
+│   ├── css/
+│   │   └── main.css        # Full design system + animations
+│   └── js/
+│       └── app.js          # All frontend logic (routing, rendering, filtering, export)
+│
+├── utils/
+│   ├── ocr.py              # Tesseract wrapper, PSM options, confidence scoring
+│   ├── preprocess.py       # Text cleaning, tokenization, sentence splitting
+│   ├── extract.py          # spaCy NER, entity classification, metrics
+│   ├── image_preprocess.py # Adaptive thresholding, perspective correction, auto-crop
+│   ├── router.py           # Quality assessment → OCR engine routing
+│   ├── pdf_handler.py      # PyMuPDF page extraction, scanned vs native PDF detection
+│   └── ui_helpers.py       # Shared formatting utilities
+│
+├── sample_docs/            # Sample documents for demo (PNG/JPG)
+├── uploads/                # Temp upload directory (auto-created)
+├── docs/                   # Internal documentation
+│
+├── Dockerfile              # Container build for Render deployment
+├── requirements.txt        # Python dependencies
+└── packages.txt            # System packages (Tesseract, libGL)
+```
 
-### 1. Tesseract OCR
+---
 
-**macOS**
+## 🚀 Running Locally
+
+### Prerequisites
+
+- Python 3.10+
+- Tesseract OCR installed on your system
+
 ```bash
+# macOS
 brew install tesseract
+
+# Ubuntu / Debian
+sudo apt-get install tesseract-ocr
+
+# Windows — download installer from:
+# https://github.com/UB-Mannheim/tesseract/wiki
 ```
 
-**Ubuntu / Debian**
-```bash
-sudo apt update && sudo apt install -y tesseract-ocr
-```
-
-**Windows**
-Download the installer from [UB Mannheim Tesseract](https://github.com/UB-Mannheim/tesseract/wiki) and add it to your `PATH`.
-
-### 2. Python 3.10+
-
-Check your version:
-```bash
-python3 --version
-```
-
----
-
-## 🚀 Installation
+### Install & Run
 
 ```bash
-# 1. Clone the repository
-git clone https://github.com/TSRivastav5/DocuMind-AI-Document-Understanding.git
-cd DocuMind-AI-Document-Understanding
+# 1. Clone the repo
+git clone https://github.com/your-username/doc_understanding_demo.git
+cd doc_understanding_demo
 
 # 2. Create and activate a virtual environment
-python3 -m venv .venv
+python -m venv .venv
 source .venv/bin/activate        # Windows: .venv\Scripts\activate
 
 # 3. Install Python dependencies
 pip install -r requirements.txt
 
-# 4. Download the spaCy language model
+# 4. Download the spaCy model
 python -m spacy download en_core_web_sm
 
-# 5. Download NLTK data
-python -c "import nltk; nltk.download('punkt'); nltk.download('averaged_perceptron_tagger')"
+# 5. Run the Flask web server
+python web_app.py
 ```
+
+The app will start at **http://localhost:8080**
+
+> **Note:** The legacy Streamlit interface is still available. Run it with `streamlit run app.py` — it is fully independent of the Flask UI.
 
 ---
 
-## ▶️ Running the App
+## 🐳 Docker
 
 ```bash
-streamlit run app.py
+# Build the image
+docker build -t documind .
+
+# Run the container
+docker run -p 8080:8080 documind
 ```
 
-The app will open at **http://localhost:8501**
+The `Dockerfile` installs Tesseract, libGL, and all Python dependencies automatically.
 
 ---
 
-## 📂 Project Structure
+## 🌐 Deployment (Render)
 
-```
-DocuMind-AI-Document-Understanding/
-│
-├── app.py                        # Streamlit application
-├── requirements.txt              # Python dependencies
-├── generate_samples.py           # Script to regenerate sample documents
-│
-├── utils/
-│   ├── ocr.py                   # Tesseract OCR wrapper + PSM options
-│   ├── preprocess.py            # Text cleaning & NLTK tokenization
-│   ├── extract.py               # spaCy NER + regex entity extraction
-│   ├── image_preprocess.py      # Image quality assessment + enhancement
-│   ├── router.py                # OCR routing engine (Standard / Aggressive / Reject)
-│   ├── pdf_handler.py           # PyMuPDF PDF parsing
-│   └── ui_helpers.py            # UI utilities
-│
-└── sample_docs/
-    ├── sample_invoice.png
-    ├── sample_letter.png
-    └── sample_receipt.png
-```
+The app is deployed at: **https://documind-ai-document-understanding.onrender.com**
+
+Render is configured to:
+1. Build via the `Dockerfile`
+2. Expose port `8080`
+3. Run `python web_app.py` as the start command
+
+For your own Render deployment:
+1. Connect your GitHub repo
+2. Choose **Docker** as the environment
+3. Set the port to `8080`
+4. No environment variables required for basic operation
 
 ---
 
-## 🎮 How to Use
+## 🔌 API Reference
 
-### Step 1 — Upload or Try a Sample
-- Click **"Try a Sample Document"** to test with built-in invoice, letter, or receipt images
-- Or drag-and-drop your own **PNG, JPG, JPEG, or PDF** (max 10 MB)
+### `POST /api/analyze`
 
-### Step 2 — Configure Settings (Sidebar)
-| Setting | What it does |
-|---|---|
-| **Image Preprocessing** | Toggle preprocessing on/off |
-| **Preprocessing Mode** | `standard` (scanned PDFs) · `aggressive` (noisy/faded) · `photo` (camera/WhatsApp) |
-| **PSM Mode** | Tesseract Page Segmentation Mode — controls how the page layout is read |
-| **Min Confidence Threshold** | Filter out low-confidence entities |
-| **Entity Types to Show** | Pick which entity types to display |
+Upload a document for OCR + NLP analysis.
 
-### Step 3 — View Results
+**Request:** `multipart/form-data`
 
-Results are split across 5 tabs:
+| Field | Type | Description |
+|---|---|---|
+| `file` | File | PDF, PNG, JPG, or JPEG (max 10 MB) |
+| `mode` | string | OCR preprocessing mode: `standard` \| `aggressive` \| `photo` |
+| `psm` | integer | Tesseract Page Segmentation Mode (0–13, default: 6) |
 
-| Tab | Contents |
-|---|---|
-| 📄 **Extracted Text** | Raw OCR output vs. cleaned text, side by side; tokenization details; POS tags |
-| 🧩 **Entities** | Filterable table of all extracted entities with type, value & confidence |
-| 🗂️ **JSON View** | Structured JSON output + one-click download |
-| 📈 **Analytics** | Entity distribution chart, Precision/Recall/F1 metrics, processing timeline |
-| 🖼️ **Document Preview** | Original image with optional OCR bounding boxes or confidence heatmap overlay |
+**Response:** `application/json`
+
+```json
+{
+  "success": true,
+  "filename": "invoice.png",
+  "raw_text": "MR TRISHANT SRIVASTAVA...",
+  "cleaned_text": "Mr Trishant Srivastava...",
+  "entities": [
+    { "value": "Trishant Srivastava", "type": "PERSON",  "confidence": "high" },
+    { "value": "16/02/2022",          "type": "DATE",    "confidence": "high" },
+    { "value": "₹12,400",             "type": "MONEY",   "confidence": "medium" }
+  ],
+  "entity_count": 14,
+  "doc_type": "invoice",
+  "ocr_confidence": 87.4,
+  "avg_confidence": 82,
+  "total_time_ms": 423.1,
+  "timings": {
+    "preprocess_ms": 38.2,
+    "ocr_ms": 312.4,
+    "clean_ms": 18.1,
+    "nlp_pre_ms": 10.5,
+    "extraction_ms": 43.9
+  },
+  "metrics": {
+    "precision_proxy": 88,
+    "recall_proxy": 76,
+    "f1_proxy": 81
+  },
+  "model_used": "en_core_web_sm",
+  "config_used": "--oem 3 --psm 6"
+}
+```
+
+### `GET /api/samples`
+
+Returns a list of available sample documents.
+
+```json
+[
+  { "name": "sample_invoice", "filename": "sample_invoice.png" },
+  { "name": "sample_letter",  "filename": "sample_letter.png"  }
+]
+```
+
+### `GET /api/samples/<filename>`
+
+Serves a sample document file by filename.
 
 ---
 
-## 🧠 OCR Routing Logic
+## 🎨 Design System
 
-DocuMind scores every image before running OCR:
+The UI uses a warm terracotta/charcoal design system defined as CSS custom properties in `main.css`:
+
+| Token | Value | Usage |
+|---|---|---|
+| `--primary` | `#ab2f00` | Accent, borders, highlights |
+| `--primary-dark` | `#271813` | Sidebar, dark buttons |
+| `--surface` | `#fff8f6` | Main background |
+| `--surface-white` | `#ffffff` | Cards, panels |
+| `--on-surface` | `#271813` | Primary text |
+| `--on-surface-var` | `#5b4039` | Secondary text |
+| `--outline-var` | `#e4beb4` | Borders |
+| `--font-serif` | Instrument Serif | Display headings |
+| `--font-sans` | Geist Sans | Body, UI text |
+| `--font-mono` | Geist Mono | Code, OCR output |
+
+---
+
+## 🧠 How It Works
 
 ```
-Image Quality Score (0–100)
+Upload (PDF / PNG / JPG)
         │
-        ├─ ≥ 60  → ✅ Tesseract Standard
-        ├─ 35–59 → ⚠️  Tesseract Aggressive (extra denoising + contrast boost)
-        └─ < 35  → ❌ Reject (image too distorted — user shown actionable tips)
+        ▼
+Image Quality Assessment     ← utils/router.py
+(blur, brightness, contrast)
+        │
+        ▼
+Auto-Crop + Perspective Fix  ← utils/image_preprocess.py
+        │
+        ▼
+Tesseract OCR                ← utils/ocr.py
+(configurable PSM + mode)
+        │
+        ├── raw_text
+        │
+        ▼
+NLP Preprocessing            ← utils/preprocess.py
+(tokenization, sentence split, cleaning)
+        │
+        ├── cleaned_text
+        │
+        ▼
+spaCy Named Entity Recognition  ← utils/extract.py
+(PERSON, ORG, DATE, MONEY, GPE, ...)
+        │
+        ├── entities[] with confidence scores
+        │
+        ▼
+Flask JSON Response          ← web_app.py
+        │
+        ▼
+Frontend Rendering           ← static/js/app.js
+(Dual View, Entities Tab, JSON, Analytics, Preview)
 ```
-
-Quality is determined by:
-- **Blur score** — Laplacian variance (≥100 = sharp)
-- **Contrast score** — standard deviation of pixel intensities
-- **Resolution** — minimum 100 × 100 px required
 
 ---
 
-## 🏷️ Supported Entity Types
+## 📱 Browser Support
 
-| Category | Entities |
+| Browser | Status |
 |---|---|
-| **Financial** | Money, Total Amount, Subtotal, Tax/GST, Currency |
-| **Document IDs** | Invoice Number, PAN, GSTIN |
-| **Dates & Time** | Invoice Date, Due Date, Time |
-| **People & Orgs** | Person, Organization, Vendor Name, Customer Name |
-| **Contact** | Email, Phone, Website, URL |
-| **Location** | GPE (country/city), Facility |
-| **General** | Cardinal numbers, Percentages, Products |
+| Chrome 100+ | ✅ Full support |
+| Firefox 100+ | ✅ Full support |
+| Safari 16+ | ✅ Full support |
+| Edge 100+ | ✅ Full support |
+| Mobile Chrome / Safari | ✅ Responsive layout with bottom nav |
 
 ---
 
-## 📦 Dependencies
+## 🛡️ Constraints & Limits
 
-| Package | Purpose |
-|---|---|
-| `streamlit` | Web UI framework |
-| `pytesseract` | Python wrapper for Tesseract OCR |
-| `Pillow` | Image loading and manipulation |
-| `opencv-python-headless` | Image preprocessing (blur, contrast, deskew) |
-| `spacy` | Named Entity Recognition (NER) |
-| `nltk` | Sentence tokenization and POS tagging |
-| `PyMuPDF` | PDF parsing and rendering |
-| `pandas` | Entity table display |
-| `plotly` | Interactive analytics charts |
-| `numpy` | Numerical operations |
-
----
-
-## 🛠️ Troubleshooting
-
-**`TesseractNotFoundError`**
-> Tesseract is not installed or not in your PATH.
-```bash
-# macOS
-brew install tesseract
-# Ubuntu
-sudo apt install tesseract-ocr
-```
-
-**`OSError: [E050] Can't find model 'en_core_web_sm'`**
-```bash
-python -m spacy download en_core_web_sm
-```
-
-**`ModuleNotFoundError: No module named 'fitz'`**
-```bash
-pip install PyMuPDF
-```
-
-**OCR returns empty or garbled text**
-- Try switching **Preprocessing Mode** to `aggressive` or `photo` in the sidebar
-- Check the **Image Quality Report** — if the score is below 35, the image may need scanning again at higher resolution
-
----
-
-## 🤝 Contributing
-
-Pull requests are welcome! For major changes, please open an issue first to discuss what you'd like to change.
-
-1. Fork the repo
-2. Create your feature branch: `git checkout -b feature/my-feature`
-3. Commit your changes: `git commit -m 'Add my feature'`
-4. Push to the branch: `git push origin feature/my-feature`
-5. Open a Pull Request
+- **File size:** Maximum 10 MB per upload
+- **File types:** `.pdf`, `.png`, `.jpg`, `.jpeg`
+- **OCR language:** English only (Tesseract `eng` tessdata)
+- **NLP model:** `en_core_web_sm` — lightweight, fast, English only
+- **PDF:** First page only for scanned PDFs; full text extraction for native PDFs
+- **History:** Stored in browser `localStorage` — clears on browser data reset (max 20 entries)
 
 ---
 
 ## 📄 License
 
-This project is licensed under the **MIT License** — see the [LICENSE](LICENSE) file for details.
+MIT License — see [LICENSE](LICENSE) for details.
 
 ---
 
-<div align="center">
-  <sub>Built as an MCA Major Project · Trishant Srivastava</sub>
-</div>
+## 👤 Author
+
+**Trishant Srivastava**
+Built with Flask, Tesseract, spaCy, and Vanilla JS.

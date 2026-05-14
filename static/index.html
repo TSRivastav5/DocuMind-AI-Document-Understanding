@@ -4,7 +4,7 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>DocuMind — AI Document Intelligence</title>
-  <meta name="description" content="DocuMind AI: Upload legal briefs, financial reports, or technical manuals and extract structured data in seconds using advanced OCR and NLP."/>
+  <meta name="description" content="DocuMind AI: Upload legal briefs, financial reports, or scanned images and extract every name, date, amount, and clause instantly using OCR and NLP."/>
 
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
@@ -33,13 +33,13 @@
       <span class="material-symbols-outlined">home</span>
       <span>Dashboard</span>
     </a>
-    <a href="#" class="nav-item" id="navAutomation" onclick="showView('automation')">
-      <span class="material-symbols-outlined">settings_suggest</span>
-      <span>Automation</span>
-    </a>
     <a href="#" class="nav-item" id="navHistory" onclick="showView('history')">
       <span class="material-symbols-outlined">history</span>
       <span>History</span>
+    </a>
+    <a href="#" class="nav-item" id="navSettings" onclick="showView('settings')">
+      <span class="material-symbols-outlined">settings</span>
+      <span>Settings</span>
     </a>
   </nav>
 
@@ -62,18 +62,14 @@
 <!-- ══════════════════════ TOPBAR ══════════════════════ -->
 <header class="topbar" id="topbar">
   <div class="topbar-left" id="topbarLeft">
-    <h2 class="topbar-title" id="topbarTitle">Document Results</h2>
-    <nav class="topbar-tabs" id="topbarTabs">
-      <button class="tab-btn active" id="tabOverview" onclick="switchTab('overview')">Overview</button>
-      <button class="tab-btn" id="tabStructure" onclick="switchTab('structure')">Structure</button>
-      <button class="tab-btn" id="tabJson" onclick="switchTab('json')">JSON</button>
+    <h2 class="topbar-title" id="topbarTitle">DocuMind</h2>
+    <nav class="topbar-tabs" id="topbarTabs" style="display:none;">
+      <button class="tab-btn active" id="tabOverview">Overview</button>
+      <button class="tab-btn" id="tabStructure">Structure</button>
+      <button class="tab-btn" id="tabJson">JSON</button>
     </nav>
   </div>
   <div class="topbar-right">
-    <button class="btn-reset" id="btnReset" onclick="resetToUpload()" style="display:none;">
-      <span class="material-symbols-outlined">refresh</span>
-      Reset / Upload New Document
-    </button>
     <div class="topbar-search" id="topbarSearch">
       <span class="material-symbols-outlined search-icon">search</span>
       <input type="text" placeholder="Search knowledge base..." id="searchInput" class="search-input"/>
@@ -89,39 +85,100 @@
   </div>
 </header>
 
+<!-- ══════════════════════ MOBILE BOTTOM NAV ══════════════════════ -->
+<nav class="mobile-nav" id="mobileNav">
+  <a href="#" class="mob-nav-item active" id="mnavDashboard" onclick="showView('dashboard')">
+    <span class="material-symbols-outlined">home</span>
+    <span>Home</span>
+  </a>
+  <a href="#" class="mob-nav-item" id="mnavResults" onclick="showView('results')" style="display:none;">
+    <span class="material-symbols-outlined">description</span>
+    <span>Results</span>
+  </a>
+  <a href="#" class="mob-nav-item" id="mnavHistory" onclick="showView('history')">
+    <span class="material-symbols-outlined">history</span>
+    <span>History</span>
+  </a>
+  <a href="#" class="mob-nav-item" id="mnavSettings" onclick="showView('settings')">
+    <span class="material-symbols-outlined">settings</span>
+    <span>Settings</span>
+  </a>
+</nav>
+
 <!-- ══════════════════════ MAIN ══════════════════════ -->
 <main class="main-content" id="mainContent">
 
   <!-- ── VIEW: DASHBOARD (upload) ── -->
   <div id="viewDashboard" class="view active">
+
+    <!-- ── Value Proposition ── -->
     <section class="hero-section">
       <span class="hero-eyebrow">WORKSPACE</span>
-      <h3 class="hero-title">Start your intelligence<br>analysis.</h3>
-      <p class="hero-body">Upload your legal briefs, financial reports, or technical manuals. DocuMind's AI will extract structured data and reveal hidden patterns in seconds.</p>
+      <h3 class="hero-title">Upload a document. Get every name,<br>date, amount &amp; clause — instantly.</h3>
+      <p class="hero-body">DocuMind reads your PDF, DOCX, or scanned image using OCR, then uses AI to identify and extract every entity — people, organizations, dates, monetary values, legal clauses, and more. Results appear in under a second.</p>
+      <!-- Feature pills -->
+      <div class="feature-pills">
+        <span class="feature-pill"><span class="material-symbols-outlined">search</span> OCR Powered</span>
+        <span class="feature-pill"><span class="material-symbols-outlined">psychology</span> NLP Entity Extraction</span>
+        <span class="feature-pill"><span class="material-symbols-outlined">bolt</span> &lt;100ms Processing</span>
+      </div>
     </section>
 
     <!-- Metric cards (empty state) -->
     <div class="metrics-grid" id="uploadMetrics">
-      <div class="metric-card perspective-hover">
+      <div class="metric-card perspective-hover" data-tooltip="Total named entities detected by the NLP model (people, orgs, dates, amounts, etc.)">
         <p class="metric-label">TOTAL DOCUMENTS</p>
         <p class="metric-value" id="mTotalDocs">0</p>
       </div>
-      <div class="metric-card perspective-hover">
+      <div class="metric-card perspective-hover" data-tooltip="How accurately Tesseract read the raw document text (0–100%)">
         <p class="metric-label">EXTRACTION RATE</p>
-        <p class="metric-value" id="mExtrRate">—</p>
+        <p class="metric-value metric-placeholder" id="mExtrRate">e.g. 99.4%</p>
       </div>
-      <div class="metric-card perspective-hover">
-        <p class="metric-label">VERIFIED FIELDS</p>
+      <div class="metric-card perspective-hover" data-tooltip="Total number of named entities identified across all documents">
+        <p class="metric-label">ENTITIES FOUND</p>
         <p class="metric-value" id="mVerified">0</p>
       </div>
-      <div class="metric-card perspective-hover">
-        <p class="metric-label">AI CREDITS</p>
-        <div style="display:flex;align-items:baseline;gap:6px;">
-          <p class="metric-value">1,250</p>
-          <span class="metric-sub">available</span>
-        </div>
+      <div class="metric-card perspective-hover" data-tooltip="Total time from upload to completed extraction">
+        <p class="metric-label">AVG. SPEED</p>
+        <p class="metric-value metric-placeholder" id="mSpeed">e.g. &lt;50ms</p>
       </div>
     </div>
+
+    <!-- ── Template chooser (moved above upload) ── -->
+    <section class="template-section">
+      <h5 class="section-label">CHOOSE A TEMPLATE TO GET STARTED, OR UPLOAD ANY DOCUMENT:</h5>
+      <div class="template-cards-grid" id="templateGrid">
+        <div class="template-card" id="tpl-legal" onclick="selectTemplate('legal')">
+          <div class="template-card-icon"><span class="material-symbols-outlined">gavel</span></div>
+          <div class="template-card-body">
+            <p class="template-card-title">Legal Clause Extraction</p>
+            <p class="template-card-desc">Extract parties, dates, and liability clauses from contracts and briefs.</p>
+          </div>
+          <span class="template-card-link">Use this template →</span>
+        </div>
+        <div class="template-card" id="tpl-invoice" onclick="selectTemplate('invoice')">
+          <div class="template-card-icon"><span class="material-symbols-outlined">receipt_long</span></div>
+          <div class="template-card-body">
+            <p class="template-card-title">Invoice &amp; Ledger Audit</p>
+            <p class="template-card-desc">Itemize taxes, totals, and vendor details from invoices and receipts.</p>
+          </div>
+          <span class="template-card-link">Use this template →</span>
+        </div>
+        <div class="template-card" id="tpl-letter" onclick="selectTemplate('letter')">
+          <div class="template-card-icon"><span class="material-symbols-outlined">description</span></div>
+          <div class="template-card-body">
+            <p class="template-card-title">Business Letter Parse</p>
+            <p class="template-card-desc">Identify sender, recipient, and key clauses from business correspondence.</p>
+          </div>
+          <span class="template-card-link">Use this template →</span>
+        </div>
+      </div>
+      <!-- Template active confirmation bar -->
+      <div class="template-confirm-bar" id="templateConfirmBar" style="display:none;">
+        <span class="material-symbols-outlined" style="color:#16a34a;font-size:16px;">check_circle</span>
+        <span id="templateConfirmMsg"></span>
+      </div>
+    </section>
 
     <!-- Upload zone -->
     <section class="upload-section" id="uploadSection">
@@ -142,6 +199,16 @@
         <input type="file" id="fileInput" accept=".png,.jpg,.jpeg,.pdf" style="display:none;" onchange="handleFileSelect(event)"/>
       </div>
 
+      <!-- Sample document links -->
+      <div class="sample-links">
+        <span class="sample-or">— or try a sample —</span>
+        <div class="sample-btns">
+          <button class="sample-btn" onclick="loadSample('sample_invoice')">📄 Invoice</button>
+          <button class="sample-btn" onclick="loadSample('sample_letter')">📄 Business Letter</button>
+          <button class="sample-btn" onclick="loadSample('sample_invoice')">📄 Legal Brief</button>
+        </div>
+      </div>
+
       <!-- Processing spinner (hidden) -->
       <div class="processing-overlay" id="processingOverlay" style="display:none;">
         <div class="spinner-wrap">
@@ -156,43 +223,9 @@
       </div>
     </section>
 
-    <!-- Bottom row: templates + learning -->
+    <!-- Learning center -->
     <div class="bottom-grid">
-      <div>
-        <h5 class="section-label">ANALYSIS TEMPLATES</h5>
-        <div class="templates-list">
-          <div class="template-item" onclick="loadSample('sample_invoice')">
-            <div class="template-left">
-              <span class="material-symbols-outlined template-icon">gavel</span>
-              <div>
-                <p class="template-name">Legal Clause Extraction</p>
-                <p class="template-desc">Extract parties, dates, and liability clauses.</p>
-              </div>
-            </div>
-            <span class="material-symbols-outlined template-arrow">chevron_right</span>
-          </div>
-          <div class="template-item" onclick="loadSample('sample_invoice')">
-            <div class="template-left">
-              <span class="material-symbols-outlined template-icon">receipt_long</span>
-              <div>
-                <p class="template-name">Invoice & Ledger Audit</p>
-                <p class="template-desc">Itemize taxes, totals, and vendor details.</p>
-              </div>
-            </div>
-            <span class="material-symbols-outlined template-arrow">chevron_right</span>
-          </div>
-          <div class="template-item" onclick="loadSample('sample_letter')">
-            <div class="template-left">
-              <span class="material-symbols-outlined template-icon">description</span>
-              <div>
-                <p class="template-name">Business Letter Parse</p>
-                <p class="template-desc">Identify sender, recipient, and key clauses.</p>
-              </div>
-            </div>
-            <span class="material-symbols-outlined template-arrow">chevron_right</span>
-          </div>
-        </div>
-      </div>
+      <div></div>
       <div>
         <h5 class="section-label">LEARNING CENTER</h5>
         <div class="learning-card">
@@ -209,31 +242,94 @@
   <!-- ── VIEW: RESULTS ── -->
   <div id="viewResults" class="view" style="display:none;">
 
+    <!-- Sample banner (shown when demo sample is active) -->
+    <div class="sample-banner" id="sampleBanner" style="display:none;">
+      <span class="material-symbols-outlined" style="font-size:16px;">info</span>
+      Showing sample output — upload your own document to get real results.
+      <button class="sample-banner-close" onclick="document.getElementById('sampleBanner').style.display='none'">✕</button>
+    </div>
+
+    <!-- ── Live Processing Pipeline Strip ── -->
+    <div class="pipeline-strip" id="pipelineStrip" style="display:none;">
+      <div class="pipeline-step" id="pipeOcr">
+        <div class="pipe-indicator">
+          <div class="pipe-spinner"></div>
+          <span class="pipe-check material-symbols-outlined" style="display:none;">check_circle</span>
+        </div>
+        <div class="pipe-text">
+          <span class="pipe-label">OCR Complete</span>
+          <span class="pipe-value" id="pipeOcrVal">—</span>
+        </div>
+      </div>
+      <div class="pipeline-divider"></div>
+      <div class="pipeline-step" id="pipeEntities">
+        <div class="pipe-indicator">
+          <div class="pipe-spinner"></div>
+          <span class="pipe-check material-symbols-outlined" style="display:none;">check_circle</span>
+        </div>
+        <div class="pipe-text">
+          <span class="pipe-label">Entities Detected</span>
+          <span class="pipe-value" id="pipeEntVal">—</span>
+        </div>
+      </div>
+      <div class="pipeline-divider"></div>
+      <div class="pipeline-step" id="pipeConf">
+        <div class="pipe-indicator">
+          <div class="pipe-spinner"></div>
+          <span class="pipe-check material-symbols-outlined" style="display:none;">check_circle</span>
+        </div>
+        <div class="pipe-text">
+          <span class="pipe-label">Confidence Score</span>
+          <span class="pipe-value" id="pipeConfVal">—</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Post-processing Action Bar ── -->
+    <div class="action-bar" id="actionBar" style="display:none;">
+      <button class="action-btn action-primary" onclick="downloadJSON()" id="btnDownloadJson">
+        <span class="material-symbols-outlined">download</span>
+        Download JSON
+      </button>
+      <button class="action-btn action-secondary" onclick="downloadCSV()" id="btnDownloadCsv">
+        <span class="material-symbols-outlined">table_chart</span>
+        Download CSV
+      </button>
+      <button class="action-btn action-secondary" onclick="copyCleanedText()" id="btnCopyText">
+        <span class="material-symbols-outlined">content_copy</span>
+        Copy Cleaned Text
+      </button>
+      <button class="action-btn action-secondary" onclick="resetToUpload()" id="btnRunAnother">
+        <span class="material-symbols-outlined">refresh</span>
+        Run Another Document
+      </button>
+    </div>
+
     <!-- Metric cards (results state) -->
     <div class="metrics-grid" id="resultMetrics">
-      <div class="metric-card perspective-hover">
-        <p class="metric-label">TOTAL ENTITIES</p>
+      <div class="metric-card perspective-hover" data-tooltip="Total named entities detected by the NLP model">
+        <p class="metric-label">ENTITIES FOUND</p>
         <div style="display:flex;align-items:baseline;gap:8px;">
           <span class="metric-value-lg" id="rEntities">—</span>
           <span class="metric-sub">Detected</span>
         </div>
       </div>
-      <div class="metric-card perspective-hover">
+      <div class="metric-card perspective-hover" data-tooltip="How accurately Tesseract read the raw document text (0–100%)">
         <p class="metric-label">OCR ACCURACY</p>
         <div style="display:flex;align-items:baseline;gap:8px;">
           <span class="metric-value-lg" id="rOcrAcc">—</span>
-          <span class="metric-sub">Verified</span>
+          <span class="metric-sub">Confidence</span>
         </div>
       </div>
-      <div class="metric-card perspective-hover">
+      <div class="metric-card perspective-hover" data-tooltip="Total time from upload to completed extraction">
         <p class="metric-label">SPEED</p>
         <div style="display:flex;align-items:baseline;gap:8px;">
           <span class="metric-value-lg" id="rSpeed">—</span>
-          <span class="metric-sub">Extraction</span>
+          <span class="metric-sub">Total Processing</span>
         </div>
       </div>
-      <div class="metric-card perspective-hover">
-        <p class="metric-label">CONFIDENCE</p>
+      <div class="metric-card perspective-hover" data-tooltip="Average confidence score of all entity extractions by spaCy">
+        <p class="metric-label">EXTRACTION CONFIDENCE</p>
         <div style="display:flex;align-items:baseline;gap:8px;">
           <span class="metric-value-lg" id="rConf">—</span>
           <span class="metric-sub">AI Score</span>
@@ -246,8 +342,10 @@
       <!-- Panel tabs -->
       <div class="panel-header">
         <div class="panel-tabs">
-          <button class="panel-tab active" onclick="switchPanelTab('dual')" id="ptDual">Dual View</button>
-          <button class="panel-tab" onclick="switchPanelTab('entities')" id="ptEntities">Entities</button>
+          <button class="panel-tab" onclick="switchPanelTab('dual')" id="ptDual">Dual View</button>
+          <button class="panel-tab active" onclick="switchPanelTab('entities')" id="ptEntities">
+            Entities <span class="tab-count-badge" id="entitiesTabCount" style="display:none;"></span>
+          </button>
           <button class="panel-tab" onclick="switchPanelTab('structure')" id="ptStructure">Structure</button>
           <button class="panel-tab" onclick="switchPanelTab('json')" id="ptJson">JSON</button>
           <button class="panel-tab" onclick="switchPanelTab('analytics')" id="ptAnalytics">Analytics</button>
@@ -261,8 +359,8 @@
         </div>
       </div>
 
-      <!-- DUAL VIEW -->
-      <div id="panelDual" class="panel-content">
+      <!-- DUAL VIEW (hidden by default — Entities is default) -->
+      <div id="panelDual" class="panel-content" style="display:none;">
         <!-- View mode toggle -->
         <div class="view-mode-bar">
           <label class="view-mode-opt">
@@ -288,25 +386,26 @@
           </label>
         </div>
         <div class="dual-grid" id="dualGrid">
-          <!-- Raw Extraction -->
+          <!-- Raw OCR Output -->
           <div class="raw-panel" id="colRaw">
             <div class="raw-header">
-              <h3 class="panel-section-label">RAW EXTRACTION</h3>
+              <h3 class="panel-section-label">Raw OCR Output</h3>
+              <span class="tech-badge">Tesseract</span>
             </div>
             <div class="raw-body" id="rawBody">
-              <p class="raw-comment"># SOURCE_LAYER_01</p>
+              <p class="raw-comment"># Raw Document Text</p>
               <div id="rawTextContent"></div>
-              <p class="raw-comment" style="margin-top:2rem;">// END_OF_FILE_STREAM //</p>
             </div>
           </div>
-          <!-- Verified Intelligence -->
+          <!-- AI Cleaned Output -->
           <div class="verified-panel" id="colCleaned">
             <div class="verified-header">
-              <h3 class="panel-section-label">VERIFIED INTELLIGENCE</h3>
+              <h3 class="panel-section-label">AI Cleaned Output</h3>
               <span class="synced-badge">
                 <span class="material-symbols-outlined" style="font-size:12px;">check_circle</span>
-                SYNCED
+                AI Verified
               </span>
+              <span class="tech-badge">spaCy + NLP</span>
             </div>
             <div class="verified-body" id="verifiedBody">
               <!-- Populated by JS -->
@@ -315,8 +414,8 @@
         </div>
       </div>
 
-      <!-- ENTITIES VIEW -->
-      <div id="panelEntities" class="panel-content" style="display:none;">
+      <!-- ENTITIES VIEW (default active) -->
+      <div id="panelEntities" class="panel-content">
         <div class="entities-view" id="entitiesView">
           <!-- Populated by JS -->
         </div>
@@ -357,7 +456,7 @@
     <!-- Footer -->
     <div class="results-footer">
       <div class="footer-left">
-        <span>Audit ID: <span class="mono" id="auditId">DM-0000-X</span></span>
+        <span>Analysis ID: <span class="mono" id="auditId">—</span></span>
         <span>Model: <span class="mono" id="modelUsed">—</span></span>
       </div>
       <div class="footer-right">
@@ -379,12 +478,12 @@
     </div>
   </div>
 
-  <!-- ── VIEW: AUTOMATION ── -->
-  <div id="viewAutomation" class="view" style="display:none;">
+  <!-- ── VIEW: SETTINGS (formerly Automation) ── -->
+  <div id="viewSettings" class="view" style="display:none;">
     <section class="hero-section">
-      <span class="hero-eyebrow">AUTOMATION</span>
-      <h3 class="hero-title">Configure pipelines.</h3>
-      <p class="hero-body">Set up extraction rules and automated workflows for recurring document types.</p>
+      <span class="hero-eyebrow">SETTINGS</span>
+      <h3 class="hero-title">Configure extraction.</h3>
+      <p class="hero-body">Set OCR preprocessing mode, confidence threshold, and entity filters for your analyses.</p>
     </section>
     <div class="settings-grid">
       <div class="settings-card">

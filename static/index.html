@@ -105,18 +105,69 @@
   <!-- ── VIEW: DASHBOARD (upload) ── -->
   <div id="viewDashboard" class="view active">
 
-    <!-- ── Value Proposition ── -->
-    <section class="hero-section">
-      <span class="hero-eyebrow">WORKSPACE</span>
-      <h3 class="hero-title">Upload a document. Get every name,<br>date, amount &amp; clause — instantly.</h3>
-      <p class="hero-body">DocuMind reads your PDF, DOCX, or scanned image using OCR, then uses AI to identify and extract every entity — people, organizations, dates, monetary values, legal clauses, and more. Results appear in under a second.</p>
-      <!-- Feature pills -->
-      <div class="feature-pills">
-        <span class="feature-pill"><span class="material-symbols-outlined">search</span> OCR Powered</span>
-        <span class="feature-pill"><span class="material-symbols-outlined">psychology</span> NLP Entity Extraction</span>
-        <span class="feature-pill"><span class="material-symbols-outlined">bolt</span> &lt;100ms Processing</span>
+    <!-- ── Animated Hero ── -->
+    <section class="hero-section" aria-label="DocuMind headline">
+
+      <!-- Radial depth glow (Layer 4 — pure CSS ::before) -->
+
+      <!-- Hero inner: card + text side by side -->
+      <div class="hero-inner">
+
+        <!-- Layer 1: Floating 3D document card -->
+        <div class="hero-doc-card" aria-hidden="true">
+          <!-- Fake document lines -->
+          <div class="hdc-title-line"></div>
+          <div class="hdc-sep"></div>
+          <div class="hdc-line" style="width:88%"></div>
+          <div class="hdc-line" style="width:72%"></div>
+          <div class="hdc-line" style="width:80%"></div>
+          <div class="hdc-line" style="width:60%"></div>
+          <div class="hdc-sep"></div>
+          <!-- Entity tags inside card -->
+          <div class="hdc-tags">
+            <span class="hdc-tag hdc-tag-person entity-tag-pulse" style="animation-delay:0s">PERSON</span>
+            <span class="hdc-tag hdc-tag-date   entity-tag-pulse" style="animation-delay:0.4s">DATE</span>
+            <span class="hdc-tag hdc-tag-money  entity-tag-pulse" style="animation-delay:0.8s">MONEY</span>
+          </div>
+        </div>
+
+        <!-- Layer 2 + 3: Staggered headline + streaming entity tags -->
+        <div class="hero-text-col">
+          <!-- Headline with word-by-word reveal -->
+          <h2 class="hero-headline" id="heroHeadline">
+            <span class="hero-word" style="animation-delay:.10s">Extract</span>
+            <span class="hero-word" style="animation-delay:.20s">names,</span>
+            <span class="hero-word" style="animation-delay:.30s">dates</span>
+            <span class="hero-word" style="animation-delay:.40s">&amp;</span>
+            <span class="hero-word" style="animation-delay:.50s">amounts</span>
+            <br aria-hidden="true"/>
+            <span class="hero-word" style="animation-delay:.60s">from</span>
+            <span class="hero-word" style="animation-delay:.70s">any</span>
+            <span class="hero-word" style="animation-delay:.80s">document</span>
+            <span class="hero-word" style="animation-delay:.90s">—</span>
+            <span class="hero-word" style="animation-delay:1.00s">in</span>
+            <span class="hero-word" style="animation-delay:1.10s">milliseconds.</span>
+          </h2>
+
+          <!-- Layer 3: Streaming entity tags -->
+          <div class="hero-streaming-tags" aria-label="Example extracted entities">
+            <span class="streaming-tag st-person" style="animation-delay:1.30s; --float-delay:0s">
+              <span class="st-type">PERSON</span> Trishant Srivastava
+            </span>
+            <span class="streaming-tag st-date" style="animation-delay:1.45s; --float-delay:0.5s">
+              <span class="st-type">DATE</span> 16/02/2022
+            </span>
+            <span class="streaming-tag st-org" style="animation-delay:1.60s; --float-delay:1.0s">
+              <span class="st-type">ORG</span> Lucknow
+            </span>
+            <span class="streaming-tag st-money" style="animation-delay:1.75s; --float-delay:1.5s">
+              <span class="st-type">MONEY</span> ₹12,400
+            </span>
+          </div>
+        </div>
       </div>
     </section>
+
 
     <!-- Metric cards (empty state) -->
     <div class="metrics-grid" id="uploadMetrics">

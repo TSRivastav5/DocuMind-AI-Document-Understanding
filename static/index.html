@@ -247,6 +247,7 @@
       <div class="panel-header">
         <div class="panel-tabs">
           <button class="panel-tab active" onclick="switchPanelTab('dual')" id="ptDual">Dual View</button>
+          <button class="panel-tab" onclick="switchPanelTab('entities')" id="ptEntities">Entities</button>
           <button class="panel-tab" onclick="switchPanelTab('structure')" id="ptStructure">Structure</button>
           <button class="panel-tab" onclick="switchPanelTab('json')" id="ptJson">JSON</button>
           <button class="panel-tab" onclick="switchPanelTab('analytics')" id="ptAnalytics">Analytics</button>
@@ -262,9 +263,33 @@
 
       <!-- DUAL VIEW -->
       <div id="panelDual" class="panel-content">
-        <div class="dual-grid">
+        <!-- View mode toggle -->
+        <div class="view-mode-bar">
+          <label class="view-mode-opt">
+            <input type="radio" name="viewMode" value="sidebyside" checked onchange="setViewMode('sidebyside')"/>
+            <span class="view-mode-label">
+              <span class="material-symbols-outlined">view_column</span>
+              Side by Side
+            </span>
+          </label>
+          <label class="view-mode-opt">
+            <input type="radio" name="viewMode" value="raw" onchange="setViewMode('raw')"/>
+            <span class="view-mode-label">
+              <span class="material-symbols-outlined">raw_on</span>
+              Raw Only
+            </span>
+          </label>
+          <label class="view-mode-opt">
+            <input type="radio" name="viewMode" value="cleaned" onchange="setViewMode('cleaned')"/>
+            <span class="view-mode-label">
+              <span class="material-symbols-outlined">auto_fix_high</span>
+              Cleaned Only
+            </span>
+          </label>
+        </div>
+        <div class="dual-grid" id="dualGrid">
           <!-- Raw Extraction -->
-          <div class="raw-panel">
+          <div class="raw-panel" id="colRaw">
             <div class="raw-header">
               <h3 class="panel-section-label">RAW EXTRACTION</h3>
             </div>
@@ -275,7 +300,7 @@
             </div>
           </div>
           <!-- Verified Intelligence -->
-          <div class="verified-panel">
+          <div class="verified-panel" id="colCleaned">
             <div class="verified-header">
               <h3 class="panel-section-label">VERIFIED INTELLIGENCE</h3>
               <span class="synced-badge">
@@ -287,6 +312,13 @@
               <!-- Populated by JS -->
             </div>
           </div>
+        </div>
+      </div>
+
+      <!-- ENTITIES VIEW -->
+      <div id="panelEntities" class="panel-content" style="display:none;">
+        <div class="entities-view" id="entitiesView">
+          <!-- Populated by JS -->
         </div>
       </div>
 

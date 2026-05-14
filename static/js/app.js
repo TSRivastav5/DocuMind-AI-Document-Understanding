@@ -75,7 +75,7 @@ function switchTab(tab) {
 
 function switchPanelTab(tab) {
   activePanelTab = tab;
-  ['Dual','Structure','Json','Analytics','Preview'].forEach(t => {
+  ['Dual','Entities','Structure','Json','Analytics','Preview'].forEach(t => {
     const btn = document.getElementById('pt'+t);
     if (btn) btn.classList.remove('active');
     const panel = document.getElementById('panel'+t);
@@ -86,6 +86,27 @@ function switchPanelTab(tab) {
   if (actBtn) actBtn.classList.add('active');
   const actPanel = document.getElementById('panel'+capTab);
   if (actPanel) actPanel.style.display = '';
+}
+
+function setViewMode(mode) {
+  const grid     = document.getElementById('dualGrid');
+  const colRaw   = document.getElementById('colRaw');
+  const colClean = document.getElementById('colCleaned');
+  if (!grid || !colRaw || !colClean) return;
+
+  if (mode === 'sidebyside') {
+    grid.style.gridTemplateColumns = '1fr 1fr';
+    colRaw.style.display   = '';
+    colClean.style.display = '';
+  } else if (mode === 'raw') {
+    grid.style.gridTemplateColumns = '1fr';
+    colRaw.style.display   = '';
+    colClean.style.display = 'none';
+  } else if (mode === 'cleaned') {
+    grid.style.gridTemplateColumns = '1fr';
+    colRaw.style.display   = 'none';
+    colClean.style.display = '';
+  }
 }
 
 // ── Upload / file handling ────────────────────────
@@ -197,6 +218,7 @@ function renderResults(data) {
 
   renderRawPanel(data);
   renderVerifiedPanel(data);
+  renderEntitiesView(data);
   renderStructureView(data);
   renderJsonView(data);
   renderAnalyticsView(data);
@@ -324,6 +346,49 @@ function renderVerifiedPanel(data) {
     <button class="btn-more"><span class="material-symbols-outlined">more_horiz</span></button>
   </div>`;
 
+  el.innerHTML = html;
+}
+
+function renderEntitiesView(data) {
+  const el = document.getElementById('entitiesView');
+  const ents = data.entities || [];
+  if (!ents.length) {
+    el.innerHTML = '<p class="empty-state">No entities detected.</p>';
+    return;
+  }
+
+  // Group by type
+  const groups = {};
+  ents.forEach(e => {
+    if (!groups[e.type]) groups[e.type] = [];
+    groups[e.type].push(e);
+  });
+
+  let html = `<div style="padding:24px;">
+    <h3 class="panel-section-label" style="margin-bottom:20px;">DETECTED ENTITIES <span style="font-weight:400;font-size:11px;color:#9b7f78;margin-left:8px;">${ents.length} total</span></h3>
+    <div style="display:flex;flex-direction:column;gap:16px;">`;
+
+  for (const [type, items] of Object.entries(groups)) {
+    const color = ENTITY_TYPE_COLORS[type] || '#6b7280';
+    html += `
+      <div style="background:#fff;border:1px solid rgba(228,190,180,0.5);border-radius:6px;padding:16px;">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+          <span style="background:${color}18;color:${color};font-size:11px;font-weight:700;letter-spacing:0.08em;padding:4px 10px;border-radius:4px;border:1px solid ${color}33;">${escHtml(type)}</span>
+          <span style="font-size:11px;color:#9b7f78;font-weight:600;">${items.length} found</span>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;">
+          ${items.map(e => {
+            const confColor = e.confidence === 'high' ? '#15803d' : e.confidence === 'medium' ? '#b45309' : '#be185d';
+            return `<div style="display:flex;align-items:center;gap:8px;background:#f8f7f4;border:1px solid rgba(228,190,180,0.4);border-radius:4px;padding:6px 12px;">
+              <span style="font-size:13px;font-weight:500;color:#271813;">${escHtml(e.value)}</span>
+              <span style="font-size:10px;font-weight:700;color:${confColor};letter-spacing:0.05em;">${(e.confidence||'').toUpperCase()}</span>
+            </div>`;
+          }).join('')}
+        </div>
+      </div>`;
+  }
+
+  html += `</div></div>`;
   el.innerHTML = html;
 }
 

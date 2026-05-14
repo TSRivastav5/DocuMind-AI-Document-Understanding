@@ -363,7 +363,7 @@ function renderResults(data) {
   set('mExtrRate',  data.ocr_confidence + '%');
   set('mVerified',  data.entity_count);
 
-  // Reset filters so all types are shown for new doc
+  // Reset filters and re-render filter chips for new doc
   activeFilters = new Set(Object.keys(ENTITY_TYPE_COLORS));
   renderFilters();
 
@@ -384,55 +384,56 @@ function renderRawPanel(data) {
 
 function renderVerifiedPanel(data) {
   const el = document.getElementById('verifiedBody');
+  const cleanedText = data.cleaned_text || '';
   const ents = data.entities || [];
 
-  let html = `<div class="group-field">
-    <label class="v-field-label">Document Type</label>
-    <div class="v-field-box">
-      <span>${escHtml(titleCase(data.doc_type || 'General'))}</span>
-      <span class="material-symbols-outlined">edit</span>
-    </div>
-  </div>`;
-
-  const seen = new Set();
-  const priority = ['INVOICE_NUMBER','Invoice Number','DATE','Invoice Date','PERSON','ORG','MONEY','Total Amount'];
-  const shown = [];
-  for (const type of priority) {
-    const e = ents.find(x => x.type === type && !seen.has(x.value));
-    if (e) { seen.add(e.value); shown.push(e); }
+  // ── Section A: Full cleaned text (primary) ────────
+  if (!cleanedText.trim()) {
+    el.innerHTML = `<div class="cleaned-empty">
+      <span class="material-symbols-outlined" style="font-size:36px;color:var(--outline);">text_fields</span>
+      <p>Upload a document to see the AI-cleaned and preprocessed version of your text here.</p>
+    </div>`;
+    return;
   }
-  if (shown.length >= 2) {
-    html += `<div class="v-grid-2">`;
-    for (let i = 0; i < Math.min(2, shown.length); i++) {
-      html += `<div><label class="v-field-label">${escHtml(shown[i].type)}</label>
-        <div class="v-field-box">${escHtml(shown[i].value)}</div></div>`;
+
+  let html = `<div class="cleaned-text-block"><pre class="cleaned-pre">${escHtml(cleanedText)}</pre></div>`;
+
+  // ── Section B: Compact entity summary (secondary) ────
+  if (ents.length) {
+    const priority = [
+      {types:['INVOICE_NUMBER','Invoice Number'], label:'Invoice No.'},
+      {types:['DATE','Invoice Date'],             label:'Date'},
+      {types:['PERSON'],                          label:'Person'},
+      {types:['ORG'],                             label:'Organization'},
+      {types:['MONEY','Total Amount'],            label:'Amount'},
+      {types:['GPE'],                             label:'Location'},
+      {types:['GSTIN'],                           label:'GSTIN'},
+      {types:['PAN'],                             label:'PAN'},
+      {types:['EMAIL'],                           label:'Email'},
+      {types:['PHONE'],                           label:'Phone'},
+      {types:['CARDINAL'],                        label:'Reference No.'},
+    ];
+    const rows = [];
+    const usedValues = new Set();
+    // Always add doc type
+    rows.push({label:'Document Type', value: titleCase(data.doc_type || 'General')});
+    for (const {types, label} of priority) {
+      const match = ents.find(e => types.includes(e.type) && !usedValues.has(e.value));
+      if (match) { usedValues.add(match.value); rows.push({label, value: match.value}); }
+      if (rows.length >= 8) break;
     }
-    html += `</div>`;
+
+    html += `<div class="cleaned-summary">
+      <p class="cleaned-summary-label">EXTRACTED FIELDS</p>
+      <table class="cleaned-kv-table">
+        ${rows.map(r => `<tr>
+          <td class="ckv-key">${escHtml(r.label)}</td>
+          <td class="ckv-val">${escHtml(r.value)}</td>
+        </tr>`).join('')}
+      </table>
+    </div>`;
   }
 
-  const mainEnt = ents.find(e => e.type === 'ORG') || ents.find(e => e.type === 'PERSON');
-  if (mainEnt) {
-    html += `<div><label class="v-field-label">Entity: ${escHtml(mainEnt.type)}</label>
-      <div class="v-entity-box">
-        <p class="v-entity-name">${escHtml(mainEnt.value)}</p>
-        ${ents.filter(e => e.type==='GPE'||e.type==='FAC').slice(0,2)
-          .map(e=>`<p class="v-entity-detail">${escHtml(e.value)}</p>`).join('')}
-      </div></div>`;
-  }
-
-  const money = ents.filter(e => e.type==='MONEY'||e.type==='Total Amount');
-  if (money.length) {
-    html += `<div><label class="v-field-label">Extracted Line Items</label>
-      <table class="v-table"><thead><tr><th>Description</th><th>Amount</th></tr></thead><tbody>
-        ${money.slice(0,-1).map((e,i)=>`<tr><td>Item ${i+1}</td><td>${escHtml(e.value)}</td></tr>`).join('')}
-        <tr><td>Total Verified</td><td>${escHtml(money[money.length-1].value)}</td></tr>
-      </tbody></table></div>`;
-  }
-
-  html += `<div class="v-actions">
-    <button class="btn-approve" onclick="downloadJSON()">Approve &amp; Export</button>
-    <button class="btn-more"><span class="material-symbols-outlined">more_horiz</span></button>
-  </div>`;
   el.innerHTML = html;
 }
 
@@ -591,6 +592,13 @@ function resetToUpload() {
   const bar = document.getElementById('actionBar');
   if (bar) bar.style.display = 'none';
   showView('dashboard');
+}
+
+// ── Export Results (primary CTA) ──────────────────
+function exportResults() {
+  if (!currentResult) return;
+  // Download JSON as the primary export format
+  downloadJSON();
 }
 
 // ── Download JSON ─────────────────────────────────

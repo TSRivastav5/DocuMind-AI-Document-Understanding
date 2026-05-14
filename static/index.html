@@ -328,9 +328,12 @@
       </div>
     </div>
 
-    <!-- ── Post-processing Action Bar ── -->
     <div class="action-bar" id="actionBar" style="display:none;">
-      <button class="action-btn action-primary" onclick="downloadJSON()" id="btnDownloadJson">
+      <button class="action-btn action-primary" onclick="exportResults()" id="btnExport">
+        <span class="material-symbols-outlined">file_export</span>
+        Export Results
+      </button>
+      <button class="action-btn action-secondary" onclick="downloadJSON()" id="btnDownloadJson">
         <span class="material-symbols-outlined">download</span>
         Download JSON
       </button>

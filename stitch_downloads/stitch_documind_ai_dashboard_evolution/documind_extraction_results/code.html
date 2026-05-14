@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>DocuMind Dashboard - Analysis Results</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&amp;family=Geist+Sans:wght@100..900&amp;family=Geist+Mono:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary-container": "#d63c00",
+                        "primary": "#ab2f00",
+                        "on-error": "#ffffff",
+                        "on-primary": "#ffffff",
+                        "tertiary-fixed-dim": "#aac7ff",
+                        "outline-variant": "#e4beb4",
+                        "on-secondary-container": "#616269",
+                        "on-primary-container": "#fffbff",
+                        "tertiary-fixed": "#d6e3ff",
+                        "surface-bright": "#fff8f6",
+                        "on-background": "#271813",
+                        "surface-container": "#ffe9e4",
+                        "error-container": "#ffdad6",
+                        "tertiary-container": "#0072e1",
+                        "surface-container-highest": "#fadcd4",
+                        "error": "#ba1a1a",
+                        "surface-container-lowest": "#ffffff",
+                        "surface": "#fff8f6",
+                        "inverse-on-surface": "#ffede8",
+                        "tertiary": "#005ab4",
+                        "surface-container-low": "#fff1ed",
+                        "secondary-container": "#dfdfe6",
+                        "on-secondary-fixed-variant": "#45474c",
+                        "surface-container-high": "#ffe2da",
+                        "on-primary-fixed-variant": "#862200",
+                        "surface-tint": "#af3000",
+                        "on-tertiary-container": "#fefcff",
+                        "background": "#fff8f6",
+                        "on-surface-variant": "#5b4039",
+                        "surface-variant": "#fadcd4",
+                        "surface-dim": "#f1d4cc",
+                        "on-tertiary-fixed-variant": "#00458d",
+                        "on-primary-fixed": "#3a0a00",
+                        "secondary": "#5d5e64",
+                        "primary-fixed": "#ffdbd1",
+                        "on-tertiary": "#ffffff",
+                        "on-secondary-fixed": "#1a1b21",
+                        "on-error-container": "#93000a",
+                        "on-surface": "#271813",
+                        "on-secondary": "#ffffff",
+                        "outline": "#907067",
+                        "inverse-surface": "#3e2c27",
+                        "inverse-primary": "#ffb59f",
+                        "secondary-fixed-dim": "#c6c6cd",
+                        "secondary-fixed": "#e2e2e9",
+                        "primary-fixed-dim": "#ffb59f",
+                        "on-tertiary-fixed": "#001b3e"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "margin-mobile": "16px",
+                        "margin-desktop": "64px",
+                        "container-max": "1024px",
+                        "section-gap": "48px",
+                        "gutter": "24px"
+                    },
+                    "fontFamily": {
+                        "headline-sm": ["Instrument Serif"],
+                        "headline-md": ["Instrument Serif"],
+                        "body-lg": ["Geist Sans"],
+                        "label-sm": ["Geist Sans"],
+                        "body-md": ["Geist Sans"],
+                        "code-md": ["Geist Mono"],
+                        "label-md": ["Geist Sans"],
+                        "display-lg": ["Instrument Serif"]
+                    },
+                    "fontSize": {
+                        "headline-sm": ["24px", {"lineHeight": "1.3", "fontWeight": "400"}],
+                        "headline-md": ["32px", {"lineHeight": "1.2", "fontWeight": "400"}],
+                        "body-lg": ["18px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                        "label-sm": ["12px", {"lineHeight": "1", "fontWeight": "600"}],
+                        "body-md": ["16px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                        "code-md": ["14px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                        "label-md": ["14px", {"lineHeight": "1", "letterSpacing": "0.01em", "fontWeight": "500"}],
+                        "display-lg": ["48px", {"lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "400"}]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .stacked-shadow {
+            box-shadow: 1px 1px 0px 0px #E2E1DE, 0px 12px 24px -8px rgba(39, 24, 19, 0.08);
+        }
+        .perspective-hover:hover {
+            transform: scale(1.02) rotate(0.5deg);
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .metric-card-accent {
+            border-bottom: 2px solid #ab2f00;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface font-body-md selection:bg-primary-fixed selection:text-on-primary-fixed">
+<!-- SideNavBar Anchor -->
+<aside class="w-[240px] h-full fixed left-0 top-0 bg-inverse-surface dark:bg-on-background flex flex-col py-8 px-6 border-r border-outline-variant/20 z-50">
+<div class="mb-12">
+<h1 class="text-headline-sm font-headline-sm text-surface-bright italic">DocuMind</h1>
+<p class="text-label-md font-label-md text-surface-variant/60 tracking-wider">AI Intelligence</p>
+</div>
+<nav class="flex-1 space-y-4">
+<a class="flex items-center gap-3 text-surface-variant dark:text-outline-variant hover:text-primary transition-colors duration-200 group" href="#">
+<span class="material-symbols-outlined" data-icon="settings_suggest">settings_suggest</span>
+<span class="font-label-md text-label-md">Automation</span>
+</a>
+</nav>
+<button class="mt-8 mb-12 bg-primary text-on-primary font-label-md text-label-md py-3 px-4 rounded-lg flex items-center justify-center gap-2 hover:opacity-90 transition-all active:scale-95">
+<span class="material-symbols-outlined" data-icon="add">add</span>
+            New Analysis
+        </button>
+<div class="space-y-4 pt-6 border-t border-outline-variant/10">
+<a class="flex items-center gap-3 text-surface-variant dark:text-outline-variant hover:text-primary transition-colors duration-200 group" href="#">
+<span class="material-symbols-outlined" data-icon="help">help</span>
+<span class="font-label-md text-label-md">Help Center</span>
+</a>
+<a class="flex items-center gap-3 text-surface-variant dark:text-outline-variant hover:text-primary transition-colors duration-200 group" href="#">
+<span class="material-symbols-outlined" data-icon="account_circle">account_circle</span>
+<span class="font-label-md text-label-md">Account</span>
+</a>
+</div>
+</aside>
+<!-- TopNavBar Anchor -->
+<header class="fixed top-0 right-0 left-0 flex justify-between items-center w-full pl-[264px] pr-margin-desktop py-6 h-20 bg-surface dark:bg-background border-b border-outline-variant/10 z-40">
+<div class="flex items-center gap-8">
+<h2 class="text-headline-md font-headline-md">Document Results</h2>
+<nav class="flex gap-6">
+<a class="text-primary border-b-2 border-primary pb-4 font-label-md text-label-md" href="#">Overview</a>
+<a class="text-on-surface-variant dark:text-outline pb-4 font-label-md text-label-md hover:text-primary transition-all" href="#">History</a>
+<a class="text-on-surface-variant dark:text-outline pb-4 font-label-md text-label-md hover:text-primary transition-all" href="#">Verification</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<button class="flex items-center gap-2 border border-outline px-4 py-2 rounded-lg font-label-md text-label-md hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined" data-icon="refresh">refresh</span>
+                Reset / Upload New Document
+            </button>
+<div class="h-8 w-px bg-outline-variant/20 mx-2"></div>
+<button class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-all" data-icon="notifications">notifications</button>
+<button class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-all" data-icon="history">history</button>
+<img alt="User Profile" class="w-10 h-10 rounded-full border border-outline-variant/20 object-cover" data-alt="Close-up professional portrait of a document analyst in a brightly lit modern office setting. The lighting is soft and high-key, emphasizing a clean and authoritative atmosphere. The individual is looking directly at the camera with a subtle, confident smile. The background is slightly blurred, showcasing a minimalist and high-end tech workspace with warm neutral tones." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDDC1PI8Euk5JIsAJetPRuFoeqePI1Llx68TKAwuEpwzU5ch1MQlIDjBwJWl4Z8PPaqJa5hQgCAoJecsJt9l76XNMak57rz_T-RVdsYE4pKtrSYVlSH-QD8H3xe9sur_evq-5nZRkrpyWo-WO0J5C2gMnmk-Tx74AMIWitDTMRx2NGU_nklrV2VfQj687XAm-Qt2u8kQrei8aEQsybbJC-WVHTzdz0nfCMUHYqOPvyKZBNMkgCDp0lLpVi0Fem1yWMvl48yYbHJZeMY"/>
+</div>
+</header>
+<!-- Main Content -->
+<main class="pl-[240px] pt-20 min-h-screen">
+<div class="max-w-container-max mx-auto px-margin-desktop py-12">
+<!-- Metric Cards Bento Grid -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-section-gap">
+<!-- Entities -->
+<div class="bg-surface-container-lowest border border-outline-variant/40 p-6 metric-card-accent stacked-shadow perspective-hover cursor-default">
+<p class="text-label-sm font-label-sm uppercase text-on-surface-variant tracking-widest mb-2">Total Entities</p>
+<div class="flex items-baseline gap-2">
+<span class="text-display-lg font-display-lg text-primary">18</span>
+<span class="text-label-md font-label-md text-on-surface-variant/60">Detected</span>
+</div>
+</div>
+<!-- OCR Quality -->
+<div class="bg-surface-container-lowest border border-outline-variant/40 p-6 metric-card-accent stacked-shadow perspective-hover cursor-default">
+<p class="text-label-sm font-label-sm uppercase text-on-surface-variant tracking-widest mb-2">OCR Accuracy</p>
+<div class="flex items-baseline gap-2">
+<span class="text-display-lg font-display-lg text-primary">100%</span>
+<span class="text-label-md font-label-md text-on-surface-variant/60">Verified</span>
+</div>
+</div>
+<!-- Processing Time -->
+<div class="bg-surface-container-lowest border border-outline-variant/40 p-6 metric-card-accent stacked-shadow perspective-hover cursor-default">
+<p class="text-label-sm font-label-sm uppercase text-on-surface-variant tracking-widest mb-2">Speed</p>
+<div class="flex items-baseline gap-2">
+<span class="text-display-lg font-display-lg text-primary">0.8s</span>
+<span class="text-label-md font-label-md text-on-surface-variant/60">Extraction</span>
+</div>
+</div>
+<!-- Confidence Score -->
+<div class="bg-surface-container-lowest border border-outline-variant/40 p-6 metric-card-accent stacked-shadow perspective-hover cursor-default">
+<p class="text-label-sm font-label-sm uppercase text-on-surface-variant tracking-widest mb-2">Confidence</p>
+<div class="flex items-baseline gap-2">
+<span class="text-display-lg font-display-lg text-primary">99.4</span>
+<span class="text-label-md font-label-md text-on-surface-variant/60">AI Score</span>
+</div>
+</div>
+</div>
+<!-- Output Panel -->
+<div class="bg-surface-container-lowest border border-outline-variant/40 overflow-hidden stacked-shadow">
+<div class="flex items-center justify-between px-8 py-4 border-b border-outline-variant/20 bg-surface-container-low/50">
+<div class="flex gap-6">
+<button class="text-label-md font-label-md text-primary border-b-2 border-primary pb-1">Dual View</button>
+<button class="text-label-md font-label-md text-on-surface-variant/60 hover:text-on-surface transition-colors pb-1">Structure</button>
+<button class="text-label-md font-label-md text-on-surface-variant/60 hover:text-on-surface transition-colors pb-1">JSON</button>
+</div>
+<div class="flex items-center gap-4">
+<span class="text-label-sm font-label-sm text-outline px-2 py-1 bg-surface rounded">invoice_v2_final.pdf</span>
+<button class="material-symbols-outlined text-on-surface-variant" data-icon="download">download</button>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2">
+<!-- RAW Panel -->
+<div class="border-r border-outline-variant/20">
+<div class="px-8 py-4 bg-surface-container-low border-b border-outline-variant/10">
+<h3 class="text-label-sm font-label-sm uppercase tracking-widest text-on-surface-variant">Raw Extraction</h3>
+</div>
+<div class="p-8 bg-[#F1F0ED] h-[600px] overflow-y-auto font-code-md text-code-md text-on-surface shadow-inner leading-relaxed">
+<p class="mb-4 text-outline-variant"># SOURCE_LAYER_01</p>
+<p class="mb-2">INVOICE NUMBER: INV-2024-001</p>
+<p class="mb-2">DATE: OCTOBER 24, 2024</p>
+<p class="mb-2">BILL TO: ACME GLOBAL INDUSTRIES</p>
+<p class="mb-2">ADDR: 1234 INNOVATION WAY, SUITE 500</p>
+<p class="mb-2">SAN FRANCISCO, CA 94105</p>
+<p class="mt-6 mb-2">--- ITEM DESCRIPTION ---</p>
+<p class="mb-1">1. ENTERPRISE AI LICENSES x 50 - $25,000.00</p>
+<p class="mb-1">2. DATA STORAGE ADD-ON (5TB) - $1,200.00</p>
+<p class="mb-1">3. PREMIUM SUPPORT (ANNUAL) - $5,000.00</p>
+<p class="mt-6">TOTAL AMOUNT DUE: $31,200.00</p>
+<p class="mt-2">TAX ID: 45-9920113</p>
+<p class="mt-8 text-outline-variant italic">// END_OF_FILE_STREAM //</p>
+</div>
+</div>
+<!-- VERIFIED Panel -->
+<div>
+<div class="px-8 py-4 bg-surface-container-low border-b border-outline-variant/10 flex justify-between items-center">
+<h3 class="text-label-sm font-label-sm uppercase tracking-widest text-on-surface-variant">Verified Intelligence</h3>
+<span class="flex items-center gap-1 text-[10px] bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-bold">
+<span class="material-symbols-outlined !text-[12px]" data-icon="check_circle">check_circle</span>
+                                SYNCED
+                            </span>
+</div>
+<div class="p-8 h-[600px] overflow-y-auto font-body-md space-y-6">
+<div class="group relative">
+<label class="text-[10px] font-bold text-primary uppercase block mb-1">Document Type</label>
+<div class="bg-surface-container-low p-3 border border-outline-variant/30 rounded flex justify-between items-center group-hover:border-primary transition-colors">
+<span>Commercial Invoice</span>
+<span class="material-symbols-outlined text-outline-variant !text-[18px]" data-icon="edit">edit</span>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div>
+<label class="text-[10px] font-bold text-primary uppercase block mb-1">Invoice ID</label>
+<div class="bg-surface-container-low p-3 border border-outline-variant/30 rounded group-hover:border-primary transition-colors">
+                                        INV-2024-001
+                                    </div>
+</div>
+<div>
+<label class="text-[10px] font-bold text-primary uppercase block mb-1">Issuance Date</label>
+<div class="bg-surface-container-low p-3 border border-outline-variant/30 rounded">
+                                        2024-10-24
+                                    </div>
+</div>
+</div>
+<div>
+<label class="text-[10px] font-bold text-primary uppercase block mb-1">Entity: Client</label>
+<div class="bg-surface-container-low p-4 border border-outline-variant/30 rounded space-y-1">
+<p class="font-bold">Acme Global Industries</p>
+<p class="text-label-md text-on-surface-variant">1234 Innovation Way, Suite 500</p>
+<p class="text-label-md text-on-surface-variant">San Francisco, CA 94105</p>
+</div>
+</div>
+<div>
+<label class="text-[10px] font-bold text-primary uppercase block mb-1">Extracted Line Items</label>
+<table class="w-full text-left text-label-md mt-2">
+<thead>
+<tr class="text-on-surface-variant border-b border-outline-variant/20">
+<th class="pb-2">Description</th>
+<th class="pb-2 text-right">Amount</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant/10">
+<tr>
+<td class="py-3">Enterprise AI Licenses (50)</td>
+<td class="py-3 text-right">$25,000.00</td>
+</tr>
+<tr>
+<td class="py-3">Data Storage Add-on</td>
+<td class="py-3 text-right">$1,200.00</td>
+</tr>
+<tr>
+<td class="py-3 font-bold">Total Verified</td>
+<td class="py-3 text-right font-bold text-primary">$31,200.00</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="pt-4 flex gap-3">
+<button class="flex-1 bg-on-background text-on-primary py-3 rounded font-label-md hover:opacity-90">Approve &amp; Export</button>
+<button class="px-4 border border-outline-variant/50 rounded hover:bg-surface-container-low transition-colors">
+<span class="material-symbols-outlined" data-icon="more_horiz">more_horiz</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Contextual Footer Metadata -->
+<div class="mt-8 flex justify-between items-center text-label-md text-on-surface-variant/60">
+<div class="flex gap-4">
+<span>Audit ID: <span class="font-code-md">DM-7742-X</span></span>
+<span>Model: <span class="font-code-md">OmniExtract-v4</span></span>
+</div>
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-green-500"></span>
+<span>All services operational</span>
+</div>
+</div>
+</div>
+</main>
+<!-- Contextual FAB - Only for relevant screens -->
+<button class="fixed bottom-12 right-12 w-16 h-16 bg-on-background text-on-primary rounded-full shadow-2xl flex items-center justify-center hover:scale-110 active:scale-95 transition-all z-50">
+<span class="material-symbols-outlined !text-[28px]" data-icon="chat_bubble">chat_bubble</span>
+</button>
+</body></html>

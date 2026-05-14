@@ -1,13 +1,34 @@
 /* DocuMind Web — app.js */
 'use strict';
 
-let currentResult = null;
-let history       = JSON.parse(localStorage.getItem('dm_history') || '[]');
-let docCount      = parseInt(localStorage.getItem('dm_doc_count') || '0');
-let activeView    = 'dashboard';
+let currentResult  = null;
+let history        = JSON.parse(localStorage.getItem('dm_history') || '[]');
+let docCount       = parseInt(localStorage.getItem('dm_doc_count') || '0');
+let activeView     = 'dashboard';
 let activePanelTab = 'entities';
 let activeTemplate = null;
 let isSampleResult = false;
+
+// ── Settings state ──────────────────────────────
+let activeFilters = new Set(Object.keys({
+  PERSON:1,ORG:1,DATE:1,GPE:1,MONEY:1,CARDINAL:1,PERCENT:1,TIME:1,
+  EMAIL:1,PHONE:1,INVOICE_NUMBER:1,'Invoice Number':1,'Invoice Date':1,
+  'Total Amount':1,GSTIN:1,PAN:1,URL:1
+}));
+let currentOcrMode = 'standard';
+let currentPsm     = 6;
+
+const PSM_HINTS = {
+  0: 'PSM 0 — use for detecting page orientation only',
+  1: 'PSM 1 — automatic detection with OSD; experimental',
+  3: 'PSM 3 — fully automatic; good default for mixed layouts',
+  4: 'PSM 4 — best for documents with a single text column',
+  6: 'PSM 6 — best for clean, multi-paragraph documents',
+  7: 'PSM 7 — use for single-line images (e.g. stamps, labels)',
+  8: 'PSM 8 — use for images of a single word',
+  11:'PSM 11 — best for receipts and sparse/scattered text',
+  13:'PSM 13 — raw line mode, treats image as one text line',
+};
 
 const ENTITY_TYPE_COLORS = {
   PERSON:'#7c3aed', ORG:'#2563eb', DATE:'#0891b2', GPE:'#0d9488',
@@ -25,10 +46,9 @@ function showView(view) {
   document.querySelectorAll('.nav-item,.mob-nav-item').forEach(n => n.classList.remove('active'));
 
   const map = {
-    dashboard: {el:'viewDashboard',  nav:'navDashboard',  mnav:'mnavDashboard'},
-    results:   {el:'viewResults',    nav:'navDashboard',  mnav:'mnavResults'},
-    history:   {el:'viewHistory',    nav:'navHistory',    mnav:'mnavHistory'},
-    settings:  {el:'viewSettings',   nav:'navSettings',   mnav:'mnavSettings'},
+    dashboard: {el:'viewDashboard', nav:'navDashboard', mnav:'mnavDashboard'},
+    results:   {el:'viewResults',   nav:'navDashboard', mnav:'mnavResults'},
+    history:   {el:'viewHistory',   nav:'navHistory',   mnav:'mnavHistory'},
   };
   const m = map[view] || map.dashboard;
   const el = document.getElementById(m.el);
@@ -38,7 +58,7 @@ function showView(view) {
   const mnav = document.getElementById(m.mnav);
   if (mnav) mnav.classList.add('active');
 
-  const titleMap = {dashboard:'DocuMind', results:'Document Results', history:'Analysis History', settings:'Settings'};
+  const titleMap = {dashboard:'DocuMind', results:'Document Results', history:'Analysis History'};
   document.getElementById('topbarTitle').textContent = titleMap[view] || 'DocuMind';
 
   const tabs   = document.getElementById('topbarTabs');
@@ -49,7 +69,6 @@ function showView(view) {
     tabs.style.display = '';
     search.style.display = 'none';
     fab.style.display = '';
-    // show mobile results tab
     const mr = document.getElementById('mnavResults');
     if (mr) mr.style.display = '';
   } else {
@@ -59,7 +78,6 @@ function showView(view) {
   }
 
   if (view === 'history') renderHistory();
-  if (view === 'settings') renderSettings();
 }
 
 function switchPanelTab(tab) {
@@ -75,6 +93,11 @@ function switchPanelTab(tab) {
   if (actBtn) actBtn.classList.add('active');
   const actPanel = document.getElementById('panel'+cap);
   if (actPanel) actPanel.style.display = '';
+  // Re-render filtered views when switching tabs
+  if (currentResult) {
+    if (tab === 'entities') renderEntitiesView(currentResult);
+    if (tab === 'json')     renderJsonView(currentResult);
+  }
 }
 
 function setViewMode(mode) {
@@ -93,6 +116,82 @@ function setViewMode(mode) {
     colRaw.style.display = 'none'; colClean.style.display = '';
   }
 }
+
+// ── Settings Panel helpers ────────────────────────
+function toggleSettingsPanel() {
+  const body    = document.getElementById('settingsPanelBody');
+  const chevron = document.getElementById('settingsPanelChevron');
+  if (!body) return;
+  const open = body.style.display !== 'none';
+  body.style.display   = open ? 'none' : '';
+  if (chevron) chevron.textContent = open ? 'expand_more' : 'expand_less';
+}
+
+function syncOcrMode(val) { currentOcrMode = val; }
+
+function updatePsmHint() {
+  const sel = document.getElementById('psmMode');
+  if (!sel) return;
+  currentPsm = parseInt(sel.value, 10);
+  const hint = document.getElementById('psmHint');
+  if (hint) hint.textContent = PSM_HINTS[currentPsm] || '';
+}
+
+function renderFilters() {
+  const grid = document.getElementById('entityFilterGrid');
+  if (!grid) return;
+  grid.innerHTML = [...activeFilters, ...Object.keys(ENTITY_TYPE_COLORS).filter(k => !activeFilters.has(k))]
+    .reduce((acc, t) => { if (!acc.seen.has(t)) { acc.seen.add(t); acc.list.push(t); } return acc; }, {seen:new Set(), list:[]})
+    .list
+    .map(t => {
+      const on = activeFilters.has(t);
+      return `<span class="entity-chip${on ? ' selected' : ''}" onclick="toggleFilter('${escJs(t)}')">${escHtml(t)}</span>`;
+    }).join('');
+  updateFilterStatus();
+}
+
+function toggleFilter(type) {
+  if (activeFilters.has(type)) { activeFilters.delete(type); }
+  else                         { activeFilters.add(type); }
+  // Update chip visual
+  document.querySelectorAll('#entityFilterGrid .entity-chip').forEach(chip => {
+    const t = chip.textContent.trim();
+    chip.classList.toggle('selected', activeFilters.has(t));
+  });
+  updateFilterStatus();
+  // Live re-render
+  if (currentResult) {
+    renderEntitiesView(currentResult);
+    renderJsonView(currentResult);
+  }
+}
+
+function resetFilters() {
+  activeFilters = new Set(Object.keys(ENTITY_TYPE_COLORS));
+  renderFilters();
+  if (currentResult) { renderEntitiesView(currentResult); renderJsonView(currentResult); }
+}
+
+function updateFilterStatus() {
+  if (!currentResult) return;
+  const all     = (currentResult.entities || []);
+  const visible = all.filter(e => activeFilters.has(e.type)).length;
+  const total   = all.length;
+  const hidden  = total - visible;
+  const statusEl = document.getElementById('filterStatus');
+  if (!statusEl) return;
+  if (hidden > 0) {
+    set('filterVisible', visible); set('filterTotal', total); set('filterHidden', hidden);
+    statusEl.style.display = '';
+  } else {
+    statusEl.style.display = 'none';
+  }
+  // Update tab badge
+  const badge = document.getElementById('entitiesTabCount');
+  if (badge) { badge.textContent = visible; badge.style.display = total ? '' : 'none'; }
+}
+
+function escJs(s) { return String(s||'').replace(/'/g, "\\'"); }
 
 // ── Template selection ────────────────────────────
 const TEMPLATE_CONFIG = {
@@ -114,9 +213,9 @@ function selectTemplate(key) {
     msg.textContent = `${cfg.label} template active — entity filters configured automatically.`;
     bar.style.display = 'flex';
   }
-  // pre-set settings mode
-  const sel = document.getElementById('settingsMode');
-  if (sel) sel.value = cfg.mode;
+  // Pre-set OCR mode radio
+  document.querySelectorAll('input[name="ocrMode"]').forEach(r => r.checked = r.value === cfg.mode);
+  currentOcrMode = cfg.mode;
 }
 
 // ── Upload / file handling ────────────────────────
@@ -148,6 +247,8 @@ async function processFile(file) {
 
   const fd = new FormData();
   fd.append('file', file);
+  fd.append('mode', currentOcrMode);
+  fd.append('psm',  currentPsm);
 
   try {
     const res  = await fetch('/api/analyze', {method:'POST', body:fd});
@@ -262,12 +363,9 @@ function renderResults(data) {
   set('mExtrRate',  data.ocr_confidence + '%');
   set('mVerified',  data.entity_count);
 
-  // Update entities tab badge
-  const badge = document.getElementById('entitiesTabCount');
-  if (badge) {
-    badge.textContent = data.entity_count;
-    badge.style.display = '';
-  }
+  // Reset filters so all types are shown for new doc
+  activeFilters = new Set(Object.keys(ENTITY_TYPE_COLORS));
+  renderFilters();
 
   renderRawPanel(data);
   renderVerifiedPanel(data);
@@ -275,6 +373,7 @@ function renderResults(data) {
   renderStructureView(data);
   renderJsonView(data);
   renderAnalyticsView(data);
+  updateFilterStatus();
 }
 
 function renderRawPanel(data) {
@@ -339,17 +438,25 @@ function renderVerifiedPanel(data) {
 
 function renderEntitiesView(data) {
   const el = document.getElementById('entitiesView');
-  const ents = data.entities || [];
-  if (!ents.length) {
+  const allEnts = data.entities || [];
+  // Apply active filters
+  const ents = allEnts.filter(e => activeFilters.has(e.type));
+
+  if (!allEnts.length) {
     el.innerHTML = '<p class="empty-state">No entities detected.</p>';
     return;
   }
+  if (!ents.length) {
+    el.innerHTML = '<p class="empty-state">All entity types are hidden by your filters. <button class="sp-reset-btn" onclick="resetFilters()">Reset Filters</button></p>';
+    return;
+  }
+
   const groups = {};
   ents.forEach(e => { if (!groups[e.type]) groups[e.type] = []; groups[e.type].push(e); });
 
   let html = `<div style="padding:24px;">
     <h3 class="panel-section-label" style="margin-bottom:20px;">DETECTED ENTITIES
-      <span style="font-weight:400;font-size:11px;color:#9b7f78;margin-left:8px;">${ents.length} total</span>
+      <span style="font-weight:400;font-size:11px;color:#9b7f78;margin-left:8px;">${ents.length} of ${allEnts.length}</span>
     </h3>
     <div style="display:flex;flex-direction:column;gap:16px;">`;
 
@@ -393,8 +500,9 @@ function renderStructureView(data) {
 }
 
 function renderJsonView(data) {
+  const filteredEnts = (data.entities || []).filter(e => activeFilters.has(e.type));
   document.getElementById('jsonPre').textContent = JSON.stringify({
-    entities: data.entities,
+    entities: filteredEnts,
     doc_type: data.doc_type,
     ocr_confidence: data.ocr_confidence,
     processing_timings_ms: data.timings,
@@ -550,6 +658,14 @@ function titleCase(s) {
 document.addEventListener('DOMContentLoaded', () => {
   showView('dashboard');
   set('mTotalDocs', docCount);
-  // Default panel tab is Entities
   switchPanelTab('entities');
+  renderFilters();
+  updatePsmHint();
+  // On mobile, collapse settings panel by default
+  if (window.innerWidth < 1024) {
+    const body = document.getElementById('settingsPanelBody');
+    const chevron = document.getElementById('settingsPanelChevron');
+    if (body)    body.style.display = 'none';
+    if (chevron) chevron.textContent = 'expand_more';
+  }
 });

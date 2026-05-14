@@ -37,10 +37,7 @@
       <span class="material-symbols-outlined">history</span>
       <span>History</span>
     </a>
-    <a href="#" class="nav-item" id="navSettings" onclick="showView('settings')">
-      <span class="material-symbols-outlined">settings</span>
-      <span>Settings</span>
-    </a>
+
   </nav>
 
   <div class="sidebar-bottom">
@@ -99,10 +96,7 @@
     <span class="material-symbols-outlined">history</span>
     <span>History</span>
   </a>
-  <a href="#" class="mob-nav-item" id="mnavSettings" onclick="showView('settings')">
-    <span class="material-symbols-outlined">settings</span>
-    <span>Settings</span>
-  </a>
+
 </nav>
 
 <!-- ══════════════════════ MAIN ══════════════════════ -->
@@ -180,62 +174,111 @@
       </div>
     </section>
 
-    <!-- Upload zone -->
-    <section class="upload-section" id="uploadSection">
-      <div class="upload-zone" id="uploadZone"
-           ondragover="handleDragOver(event)"
-           ondragleave="handleDragLeave(event)"
-           ondrop="handleDrop(event)"
-           onclick="document.getElementById('fileInput').click()">
-        <div class="upload-icon-wrap">
-          <span class="material-symbols-outlined upload-icon">upload_file</span>
-        </div>
-        <h4 class="upload-title">Click to upload or drag and drop</h4>
-        <p class="upload-body">PDF, DOCX, and scanned images (PNG, JPG) supported.<br>High-resolution scans recommended for OCR accuracy.</p>
-        <div class="upload-btns">
-          <button class="btn-primary" onclick="event.stopPropagation(); document.getElementById('fileInput').click()">Select Files</button>
-          <button class="btn-ghost">Import from Drive</button>
-        </div>
-        <input type="file" id="fileInput" accept=".png,.jpg,.jpeg,.pdf" style="display:none;" onchange="handleFileSelect(event)"/>
-      </div>
+    <!-- Upload + Settings two-column layout -->
+    <div class="upload-settings-row">
 
-      <!-- Sample document links -->
-      <div class="sample-links">
-        <span class="sample-or">— or try a sample —</span>
-        <div class="sample-btns">
-          <button class="sample-btn" onclick="loadSample('sample_invoice')">📄 Invoice</button>
-          <button class="sample-btn" onclick="loadSample('sample_letter')">📄 Business Letter</button>
-          <button class="sample-btn" onclick="loadSample('sample_invoice')">📄 Legal Brief</button>
+      <!-- LEFT: Upload zone -->
+      <section class="upload-section" id="uploadSection">
+        <div class="upload-zone" id="uploadZone"
+             ondragover="handleDragOver(event)"
+             ondragleave="handleDragLeave(event)"
+             ondrop="handleDrop(event)"
+             onclick="document.getElementById('fileInput').click()">
+          <div class="upload-icon-wrap">
+            <span class="material-symbols-outlined upload-icon">upload_file</span>
+          </div>
+          <h4 class="upload-title">Click to upload or drag and drop</h4>
+          <p class="upload-body">PDF, DOCX, and scanned images (PNG, JPG) supported.<br>High-resolution scans recommended for OCR accuracy.</p>
+          <div class="upload-btns">
+            <button class="btn-primary" onclick="event.stopPropagation(); document.getElementById('fileInput').click()">Select Files</button>
+            <button class="btn-ghost">Import from Drive</button>
+          </div>
+          <input type="file" id="fileInput" accept=".png,.jpg,.jpeg,.pdf" style="display:none;" onchange="handleFileSelect(event)"/>
         </div>
-      </div>
 
-      <!-- Processing spinner (hidden) -->
-      <div class="processing-overlay" id="processingOverlay" style="display:none;">
-        <div class="spinner-wrap">
-          <div class="spinner"></div>
-          <p class="spinner-label" id="spinnerLabel">Analyzing document…</p>
-          <div class="spinner-steps" id="spinnerSteps">
-            <div class="spinner-step active" id="step1"><span class="material-symbols-outlined">crop</span> Auto-cropping</div>
-            <div class="spinner-step" id="step2"><span class="material-symbols-outlined">text_fields</span> Running OCR</div>
-            <div class="spinner-step" id="step3"><span class="material-symbols-outlined">psychology</span> Extracting entities</div>
+        <!-- Sample document links -->
+        <div class="sample-links">
+          <span class="sample-or">— or try a sample —</span>
+          <div class="sample-btns">
+            <button class="sample-btn" onclick="loadSample('sample_invoice')">📄 Invoice</button>
+            <button class="sample-btn" onclick="loadSample('sample_letter')">📄 Business Letter</button>
+            <button class="sample-btn" onclick="loadSample('sample_invoice')">📄 Legal Brief</button>
           </div>
         </div>
-      </div>
-    </section>
 
-    <!-- Learning center -->
-    <div class="bottom-grid">
-      <div></div>
-      <div>
-        <h5 class="section-label">LEARNING CENTER</h5>
-        <div class="learning-card">
-          <div class="learning-bg" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCFGAJoJ3_DeER9-OupRWO7J0GOc8nGCHVVEIePnb-diNciB4qQ4KPmEJKC8LGk8BWut9L2o4uGNegp_p_ghhstcBlE0z9ZpDhhmpIuc4kiwVvjUjYKY3UsOIJHMdjYQQTiKkd6yHaXKwTsjFyy2cO8lWEEjOiqmeicOq-om32bYiyaGIbJux-f_GOrNXijx2iZOzfTvzQGakBoCthuQnZCSmdvoMd2jZP098FPdFF4XrW4ZtYNcqC3UAE5VYpNIVKwQfy3Qjj8p2yF'); background-size: cover; background-position: center;"></div>
-          <div class="learning-overlay">
-            <p class="learning-title">Mastering Document AI</p>
-            <p class="learning-sub">Watch our 3-minute onboarding guide →</p>
+        <!-- Processing spinner (hidden) -->
+        <div class="processing-overlay" id="processingOverlay" style="display:none;">
+          <div class="spinner-wrap">
+            <div class="spinner"></div>
+            <p class="spinner-label" id="spinnerLabel">Analyzing document…</p>
+            <div class="spinner-steps" id="spinnerSteps">
+              <div class="spinner-step active" id="step1"><span class="material-symbols-outlined">crop</span> Auto-cropping</div>
+              <div class="spinner-step" id="step2"><span class="material-symbols-outlined">text_fields</span> Running OCR</div>
+              <div class="spinner-step" id="step3"><span class="material-symbols-outlined">psychology</span> Extracting entities</div>
+            </div>
           </div>
         </div>
-      </div>
+      </section>
+
+      <!-- RIGHT: Compact settings panel -->
+      <aside class="settings-panel" id="settingsPanel">
+        <button class="settings-panel-header" onclick="toggleSettingsPanel()" id="settingsPanelToggle">
+          <span style="display:flex;align-items:center;gap:6px;">
+            <span class="material-symbols-outlined" style="font-size:15px;">settings</span>
+            Extraction Settings
+          </span>
+          <span class="material-symbols-outlined settings-panel-chevron" id="settingsPanelChevron">expand_more</span>
+        </button>
+        <div class="settings-panel-body" id="settingsPanelBody">
+
+          <!-- OCR Mode -->
+          <div class="sp-group">
+            <p class="sp-label">OCR MODE</p>
+            <label class="sp-radio"><input type="radio" name="ocrMode" value="standard" checked onchange="syncOcrMode(this.value)"/> Standard — Scanned PDFs</label>
+            <label class="sp-radio"><input type="radio" name="ocrMode" value="aggressive" onchange="syncOcrMode(this.value)"/> Aggressive — Noisy/Faded</label>
+            <label class="sp-radio"><input type="radio" name="ocrMode" value="photo" onchange="syncOcrMode(this.value)"/> Photo — Camera/WhatsApp</label>
+          </div>
+
+          <!-- PSM Mode -->
+          <div class="sp-group">
+            <p class="sp-label" style="display:flex;align-items:center;gap:4px;">
+              PSM MODE
+              <span class="material-symbols-outlined sp-info-icon" title="Page Segmentation Mode controls how Tesseract reads the layout of your document. Use PSM 6 for standard documents, PSM 7 for single-line images, PSM 11 for scanned receipts with sparse text.">info</span>
+            </p>
+            <select class="sp-select" id="psmMode" onchange="updatePsmHint()">
+              <option value="0">PSM 0 — Orientation and script detection only</option>
+              <option value="1">PSM 1 — Automatic page segmentation with OSD</option>
+              <option value="3">PSM 3 — Fully automatic page segmentation</option>
+              <option value="4">PSM 4 — Single column of text</option>
+              <option value="6" selected>PSM 6 — Uniform block of text</option>
+              <option value="7">PSM 7 — Single text line</option>
+              <option value="8">PSM 8 — Single word</option>
+              <option value="11">PSM 11 — Sparse text, find as much as possible</option>
+              <option value="13">PSM 13 — Raw line, treat as single text line</option>
+            </select>
+            <p class="sp-hint" id="psmHint">PSM 6 — best for clean, multi-paragraph documents</p>
+          </div>
+
+          <!-- Min Confidence -->
+          <div class="sp-group">
+            <p class="sp-label">MIN CONFIDENCE <span class="sp-range-val" id="settingsConfVal">0%</span></p>
+            <input type="range" min="0" max="100" value="0" class="sp-range" id="settingsConf" oninput="set('settingsConfVal', this.value+'%')"/>
+          </div>
+
+          <!-- Entity Filters -->
+          <div class="sp-group">
+            <p class="sp-label">ENTITY FILTERS</p>
+            <div class="sp-chips" id="entityFilterGrid">
+              <!-- Populated by JS -->
+            </div>
+            <p class="sp-filter-status" id="filterStatus" style="display:none;">
+              Showing <span id="filterVisible">0</span> of <span id="filterTotal">0</span> entities
+              — <span id="filterHidden">0</span> hidden
+              <button class="sp-reset-btn" onclick="resetFilters()">Reset Filters</button>
+            </p>
+          </div>
+        </div>
+      </aside>
     </div>
   </div>
 
@@ -478,38 +521,7 @@
     </div>
   </div>
 
-  <!-- ── VIEW: SETTINGS (formerly Automation) ── -->
-  <div id="viewSettings" class="view" style="display:none;">
-    <section class="hero-section">
-      <span class="hero-eyebrow">SETTINGS</span>
-      <h3 class="hero-title">Configure extraction.</h3>
-      <p class="hero-body">Set OCR preprocessing mode, confidence threshold, and entity filters for your analyses.</p>
-    </section>
-    <div class="settings-grid">
-      <div class="settings-card">
-        <h4 class="settings-card-title">OCR Settings</h4>
-        <div class="form-group">
-          <label class="form-label">Preprocessing Mode</label>
-          <select class="form-select" id="settingsMode">
-            <option value="standard">Standard — Scanned PDFs</option>
-            <option value="aggressive">Aggressive — Noisy / Faded</option>
-            <option value="photo">Photo — Camera / WhatsApp</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Min Confidence Threshold</label>
-          <input type="range" min="0" max="100" value="0" class="form-range" id="settingsConf"/>
-          <span class="form-range-val" id="settingsConfVal">0%</span>
-        </div>
-      </div>
-      <div class="settings-card">
-        <h4 class="settings-card-title">Entity Filters</h4>
-        <div class="entity-filter-grid" id="entityFilterGrid">
-          <!-- Populated by JS -->
-        </div>
-      </div>
-    </div>
-  </div>
+
 
 </main>
 
